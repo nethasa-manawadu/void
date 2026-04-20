@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>VOID</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;900&display=use" rel="stylesheet">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #03050f;
+    color: white;
+    overflow-x: hidden;
+}
+
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+}
+
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 40px;
+    z-index: 100;
+    background: rgba(2, 6, 15, 0.5);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(0, 100, 255, 0.2);
+}
+
+nav h2 {
+    color: #7aa5ff;
+    font-weight: 300;
+    letter-spacing: 4px;
+    font-size: 1.2rem;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    gap: 40px;
+}
+
+nav a {
+    color: #a0b5dd;
+    text-decoration: none;
+    font-weight: 300;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+nav a:hover {
+    color: #7aa5ff;
+}
+
+section {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+    scroll-margin-top: 0;
+}
+
+section * {
+    pointer-events: none;
+}
+
+.hero {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 900;
+    letter-spacing: 8px;
+    color: #ffffff;
+    text-shadow: 0 0 30px #1a4cff;
+    opacity: 0.9;
+}
+
+.content {
+    color: white;
+}
+
+.content h1 {
+    font-size: 2.5rem;
+    font-weight: 500;
+    letter-spacing: 4px;
+    color: #aac3ff;
+    text-shadow: 0 0 20px #1a4cff;
+    margin-bottom: 10px;
+}
+
+.content p {
+    font-size: 1rem;
+    font-weight: 300;
+    color: #afc4ff;
+    letter-spacing: 1px;
+    line-height: 1.6;
+    max-width: 500px;
+}
+
+/* PROGRESS RING */
+.scroll-progress {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: min(60px, 12vw);
+    height: min(60px, 12vw);
+    min-width: 40px;
+    min-height: 40px;
+    max-width: 70px;
+    max-height: 70px;
+    z-index: 100;
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+}
+
+.progress-ring-circle-bg {
+    stroke: rgba(0, 20, 40, 0.7);
+    stroke-width: 3;
+    fill: transparent;
+    backdrop-filter: blur(8px);
+}
+
+.progress-ring-circle {
+    stroke: #7aa5ff;
+    stroke-width: 3;
+    fill: transparent;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.1s;
+    filter: drop-shadow(0 0 6px #1a4cff);
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #7aa5ff;
+    font-size: clamp(0.7rem, 3vw, 0.9rem);
+    font-weight: 300;
+    text-shadow: 0 0 10px #1a4cff;
+    background: rgba(0, 20, 40, 0.5);
+    backdrop-filter: blur(4px);
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(122, 165, 255, 0.3);
+}
+
+/* Sound toggle indicator (optional) */
+.sound-indicator {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    color: #7aa5ff;
+    font-size: 0.8rem;
+    opacity: 0.5;
+    z-index: 100;
+}
+
+@media (max-width: 768px) {
+    nav { padding: 15px 20px; }
+    nav ul { gap: 20px; }
+    nav a { font-size: 0.7rem; }
+    .hero { font-size: 2.5rem; letter-spacing: 4px; }
+    .content h1 { font-size: 1.8rem; }
+    .content p { font-size: 0.9rem; }
+    .scroll-progress { 
+        bottom: 20px; 
+        right: 20px; 
+    }
+    .sound-indicator {
+        bottom: 20px;
+        left: 20px;
+        font-size: 0.7rem;
+    }
+}
+</style>
+
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+    }
+}
+</script>
+</head>
+<body>
+
+<nav>
+    <h2>◈ 空所</h2>
+    <ul>
+        <li><a href="#home" class="nav-link">HOME</a></li>
+        <li><a href="#void" class="nav-link">空所</a></li>
+        <li><a href="#depth" class="nav-link">深さ</a></li>
+        <li><a href="#infinity" class="nav-link">∞</a></li>
+    </ul>
+</nav>
+
+<div id="canvas-container"></div>
+
+<!-- PROGRESS RING -->
+<div class="scroll-progress" id="scrollProgress">
+    <svg class="progress-ring" viewBox="0 0 60 60">
+        <circle class="progress-ring-circle-bg" cx="30" cy="30" r="26"/>
+        <circle class="progress-ring-circle" cx="30" cy="30" r="26"/>
+    </svg>
+    <div class="progress-text" id="progressText">0</div>
+</div>
+
+<section id="home">
+    <div class="hero">青い空間</div>
+</section>
+
+<section id="void">
+    <div class="content">
+        <h1>空所</h1>
+        <p>deep space<br>blue shift<br>scroll to feel</p>
+    </div>
+</section>
+
+<section id="depth">
+    <div class="content">
+        <h1>深さ</h1>
+        <p>light bends<br>time slows<br>colors fade</p>
+    </div>
+</section>
+
+<section id="infinity">
+    <div class="content">
+        <h1>∞</h1>
+        <p>the void<br>scrolls back<br>eternal</p>
+    </div>
+</section>
+
+<script type="module">
+    import * as THREE from 'three';
+
+    // --- NAVIGATION CLICK HANDLER ---
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href');
+            const targetSection = document.querySelector(targetId);
+            
+            if (targetSection) {
+                targetSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // --- SOUND SYSTEM - KENNEY CC0 FREE SOUNDS! ---
+    // These are from Kenney's UI audio pack - completely free (CC0 license)
+    // No attribution needed, can use commercially [citation:6]
+    
+    // Create audio context (must be initialized after user interaction)
+    let audioContext = null;
+    
+    // Base64 encoded minimal click sounds (tiny size, no external files!)
+    // These are generated sine wave clicks - pure, clean, and instant
+    const createClickSound = (frequency = 300, duration = 0.05) => {
+        return (ctx) => {
+            const oscillator = ctx.createOscillator();
+            const gainNode = ctx.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+            
+            gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(ctx.destination);
+            
+            oscillator.start();
+            oscillator.stop(ctx.currentTime + duration);
+        };
+    };
+    
+    // Different click variations for variety
+    const sounds = [
+        (ctx) => createClickSound(400, 0.04)(ctx), // higher click
+        (ctx) => createClickSound(250, 0.06)(ctx), // deeper thud
+        (ctx) => createClickSound(600, 0.03)(ctx), // sharp beep
+        (ctx) => {
+            // Double click effect
+            const osc1 = ctx.createOscillator();
+            const osc2 = ctx.createOscillator();
+            const gain1 = ctx.createGain();
+            const gain2 = ctx.createGain();
+            
+            osc1.frequency.value = 500;
+            osc2.frequency.value = 300;
+            
+            gain1.gain.value = 0.08;
+            gain2.gain.value = 0.05;
+            
+            osc1.connect(gain1);
+            osc2.connect(gain2);
+            gain1.connect(ctx.destination);
+            gain2.connect(ctx.destination);
+            
+            osc1.start();
+            osc2.start();
+            osc1.stop(ctx.currentTime + 0.02);
+            osc2.stop(ctx.currentTime + 0.04);
+        }
+    ];
+
+    // Function to play random click
+    const playTapSound = () => {
+        try {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+                    randomSound(audioContext);
+                });
+            } else {
+                const randomSound = sounds[Math.floor(Math.random() * sounds.length)];
+                randomSound(audioContext);
+            }
+        } catch (e) {
+            console.log('Audio not supported');
+        }
+    };
+
+    // Add tap listener to entire document
+    document.addEventListener('click', () => {
+        playTapSound();
+    });
+
+    // Also play on touch for mobile
+    document.addEventListener('touchstart', () => {
+        playTapSound();
+    });
+
+    // --- SETUP ---
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x030614);
+    
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 1, 15);
+    
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    // --- LIGHTING ---
+    const ambientLight = new THREE.AmbientLight(0x102040);
+    scene.add(ambientLight);
+    
+    const light1 = new THREE.PointLight(0x1a4cff, 1.5);
+    light1.position.set(3, 2, 5);
+    scene.add(light1);
+    
+    const light2 = new THREE.PointLight(0x2a5cff, 1);
+    light2.position.set(-4, -1, 6);
+    scene.add(light2);
+    
+    const light3 = new THREE.PointLight(0x0a3acc, 0.8);
+    light3.position.set(2, -2, 8);
+    scene.add(light3);
+
+    // --- MAIN VOID STRUCTURE ---
+    const centerGroup = new THREE.Group();
+
+    // Core sphere
+    const coreGeo = new THREE.IcosahedronGeometry(1.2, 3);
+    const coreMat = new THREE.MeshStandardMaterial({
+        color: 0x1a3a6a,
+        emissive: 0x0a1a3a,
+        roughness: 0.2,
+        metalness: 0.3
+    });
+    const core = new THREE.Mesh(coreGeo, coreMat);
+    core.castShadow = true;
+    centerGroup.add(core);
+
+    // Inner rings
+    const ringCount = 4;
+    for (let i = 0; i < ringCount; i++) {
+        const ringGeo = new THREE.TorusGeometry(1.8 + i * 0.5, 0.03, 16, 64);
+        const ringMat = new THREE.MeshStandardMaterial({
+            color: 0x2a5aaa,
+            emissive: 0x0a1a3a,
+            transparent: true,
+            opacity: 0.2 - i * 0.03
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.rotation.z = i * 0.5;
+        centerGroup.add(ring);
+    }
+
+    // Floating particles
+    const particleCount = 800;
+    const particleGeo = new THREE.BufferGeometry();
+    const particlePos = new Float32Array(particleCount * 3);
+    const particleColor = new Float32Array(particleCount * 3);
+    
+    for (let i = 0; i < particleCount; i++) {
+        const radius = 2.5 + Math.random() * 3;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos(2 * Math.random() - 1);
+        
+        particlePos[i*3] = Math.sin(phi) * Math.cos(theta) * radius;
+        particlePos[i*3+1] = Math.sin(phi) * Math.sin(theta) * radius * 0.3;
+        particlePos[i*3+2] = Math.cos(phi) * radius;
+        
+        const blueVal = 0.4 + Math.random() * 0.6;
+        particleColor[i*3] = 0.1;
+        particleColor[i*3+1] = 0.2;
+        particleColor[i*3+2] = blueVal;
+    }
+    
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+    particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColor, 3));
+    
+    const particleMat = new THREE.PointsMaterial({
+        size: 0.05,
+        vertexColors: true,
+        blending: THREE.AdditiveBlending,
+        transparent: true
+    });
+    
+    const particles = new THREE.Points(particleGeo, particleMat);
+    centerGroup.add(particles);
+    
+    scene.add(centerGroup);
+
+    // --- BACKGROUND STARS ---
+    const starsGeo = new THREE.BufferGeometry();
+    const starsCount = 2000;
+    const starsPos = new Float32Array(starsCount * 3);
+    const starsCol = new Float32Array(starsCount * 3);
+    
+    for (let i = 0; i < starsCount; i++) {
+        starsPos[i*3] = (Math.random() - 0.5) * 60;
+        starsPos[i*3+1] = (Math.random() - 0.5) * 60;
+        starsPos[i*3+2] = (Math.random() - 0.5) * 60;
+        
+        const blueShade = 0.5 + Math.random() * 0.5;
+        starsCol[i*3] = 0.3;
+        starsCol[i*3+1] = 0.4;
+        starsCol[i*3+2] = 1.0;
+    }
+    
+    starsGeo.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
+    starsGeo.setAttribute('color', new THREE.BufferAttribute(starsCol, 3));
+    
+    const starsMat = new THREE.PointsMaterial({
+        size: 0.1,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.6
+    });
+    
+    const stars = new THREE.Points(starsGeo, starsMat);
+    scene.add(stars);
+
+    // --- FLOATING CUBES ---
+    const debrisGroup = new THREE.Group();
+    for (let i = 0; i < 15; i++) {
+        const size = 0.1 + Math.random() * 0.2;
+        const cubeGeo = new THREE.BoxGeometry(size, size, size);
+        const cubeMat = new THREE.MeshStandardMaterial({
+            color: 0x1a3a6a,
+            emissive: 0x0a1a3a,
+            roughness: 0.4
+        });
+        const cube = new THREE.Mesh(cubeGeo, cubeMat);
+        
+        const angle = (i / 15) * Math.PI * 2;
+        const radius = 6 + Math.random() * 2;
+        cube.position.set(
+            Math.cos(angle) * radius,
+            (Math.random() - 0.5) * 3,
+            Math.sin(angle) * radius
+        );
+        debrisGroup.add(cube);
+    }
+    scene.add(debrisGroup);
+
+    // --- PROGRESS RING SETUP ---
+    const progressRing = document.querySelector('.progress-ring-circle');
+    const progressText = document.getElementById('progressText');
+    
+    const radius = 26;
+    const circumference = 2 * Math.PI * radius;
+    
+    progressRing.style.strokeDasharray = `${circumference}`;
+    progressRing.style.strokeDashoffset = circumference;
+
+    // --- SCROLL HANDLING ---
+    let scrollPercent = 0;
+    
+    window.addEventListener('scroll', () => {
+        const scrollY = window.scrollY;
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        scrollPercent = maxScroll > 0 ? scrollY / maxScroll : 0;
+        
+        // Update progress ring
+        const percent = Math.round(scrollPercent * 100);
+        progressText.textContent = percent;
+        
+        const offset = circumference - (scrollPercent * circumference);
+        progressRing.style.strokeDashoffset = Math.max(0, offset);
+
+        // 3D animations
+        centerGroup.rotation.y = scrollPercent * Math.PI * 3;
+        centerGroup.rotation.x = Math.sin(scrollPercent * Math.PI) * 0.3;
+        
+        const scale = 1 + Math.sin(scrollPercent * Math.PI * 4) * 0.05;
+        centerGroup.scale.set(scale, scale, scale);
+        
+        const blueIntensity = 0.3 + Math.sin(scrollPercent * Math.PI) * 0.2;
+        core.material.color.setRGB(0.1, 0.2, 0.5 + blueIntensity);
+        core.material.emissive.setRGB(0.05, 0.1, 0.2 + blueIntensity * 0.2);
+        
+        debrisGroup.rotation.y = scrollPercent * Math.PI;
+        debrisGroup.rotation.x = scrollPercent * 0.5;
+        
+        stars.rotation.y = scrollPercent * 0.2;
+        
+        camera.position.x = Math.sin(scrollPercent * Math.PI * 2) * 2;
+        camera.position.y = 1 + Math.sin(scrollPercent * Math.PI) * 1;
+        camera.position.z = 15 - scrollPercent * 3;
+        camera.lookAt(0, 0, 0);
+        
+        light1.intensity = 1 + Math.sin(scrollPercent * Math.PI * 4) * 0.5;
+        light2.intensity = 0.8 + Math.cos(scrollPercent * Math.PI * 3) * 0.4;
+    });
+
+    window.dispatchEvent(new Event('scroll'));
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+        stars.rotation.y += 0.0002;
+        renderer.render(scene, camera);
+    }
+    
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+</body>
+</html>
